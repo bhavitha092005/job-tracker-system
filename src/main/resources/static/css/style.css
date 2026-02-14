@@ -1,0 +1,163 @@
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: "Segoe UI", Arial, sans-serif;
+    background: #f4f6f9;
+    color: #333;
+}
+
+/*  NAVBAR*/
+.navbar {
+    background: #1e293b;
+    padding: 15px 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: white;
+}
+
+.navbar h2 {
+    margin: 0;
+    font-size: 18px;
+}
+
+.navbar button {
+    background: #ef4444;
+    border: none;
+    padding: 8px 14px;
+    border-radius: 6px;
+    color: white;
+    cursor: pointer;
+}
+
+.navbar button:hover {
+    background: #dc2626;
+}
+
+/* MAIN CONTAINER */
+.container {
+    width: 1100px;
+    max-width: 95%;
+    margin: 40px auto;
+}
+
+/* SECTION CARD */
+.section {
+    background: white;
+    padding: 25px;
+    border-radius: 10px;
+    margin-bottom: 25px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+}
+
+.section h3 {
+    margin-top: 0;
+}
+
+/* INPUTS*/
+input, textarea {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 15px;
+    border-radius: 8px;
+    border: 1px solid #d1d5db;
+    font-size: 14px;
+}
+
+input:focus {
+    outline: none;
+    border-color: #4f46e5;
+}
+
+/*  BUTTONS  */
+button.primary {
+    background: #4f46e5;
+    color: white;
+    padding: 10px 18px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+}
+
+button.primary:hover {
+    background: #4338ca;
+}
+
+button.secondary {
+    background: #e5e7eb;
+    color: #333;
+    padding: 8px 14px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+}
+
+button.secondary:hover {
+    background: #d1d5db;
+}
+
+button.danger {
+    background: #ef4444;
+    color: white;
+    padding: 8px 14px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+}
+
+button.danger:hover {
+    background: #dc2626;
+}
+
+button.small {
+    padding: 6px 12px;
+    font-size: 12px;
+}
+
+/*  CARD  */
+.card {
+    background: #ffffff;
+    padding: 18px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    border: 1px solid #e5e7eb;
+}
+
+/* STATUS BADGES */
+.status {
+    padding: 5px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.status.APPLIED { background: #f3f4f6; color: #555; }
+.status.REVIEWED { background: #e0f2fe; color: #0284c7; }
+.status.INTERVIEW { background: #fef3c7; color: #b45309; }
+.status.HIRED { background: #dcfce7; color: #15803d; }
+.status.REJECTED { background: #fee2e2; color: #b91c1c; }
+
+/* TOAST  */
+
+.toast {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    background: #333;
+    color: white;
+    padding: 12px 18px;
+    border-radius: 8px;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.3s ease;
+    z-index: 9999;
+    font-size: 14px;
+}
+
+.toast.show {
+    opacity: 1;
+    transform: translateY(0);
+}
