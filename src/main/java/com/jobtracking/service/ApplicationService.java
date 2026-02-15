@@ -72,20 +72,27 @@ public class ApplicationService {
         application.setStatus(ApplicationStatus.APPLIED);
 
         applicationRepository.save(application);
+    }
 
         // EMAIL NOTIFICATIONS
-        emailService.send(
-                candidate.getEmail(),
-                "Application Submitted",
-                "You successfully applied for: " + job.getTitle()
-        );
-
-        emailService.send(
-                job.getCreatedBy().getEmail(),
-                "New Application Received",
-                "New candidate applied to: " + job.getTitle()
-        );
-    }
+//        try {
+//            emailService.send(
+//                    candidate.getEmail(),
+//                    "Application Submitted",
+//                    "You successfully applied for: " + job.getTitle()
+//            );
+//
+//            emailService.send(
+//                    job.getCreatedBy().getEmail(),
+//                    "New Application Received",
+//                    "New candidate applied to: " + job.getTitle()
+//            );
+//
+//        } catch (Exception e) {
+//
+//            e.printStackTrace();   
+//        }
+//    }
 
     // CANDIDATE APPLICATIONS
     public List<ApplicationResponse> getMyApplications(CustomUserDetails userDetails) {
