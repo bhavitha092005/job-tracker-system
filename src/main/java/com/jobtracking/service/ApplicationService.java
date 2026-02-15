@@ -82,6 +82,11 @@ public class ApplicationService {
         JobApplication application = applicationRepository
                 .findWithJobAndCreatorById(applicationId)
                 .orElseThrow(() -> new ResourceNotFoundException("Application not found"));
+         
+        
+        System.out.println("HR ID = " + hrDetails.getId());
+        System.out.println("JOB CREATOR ID = " +
+                application.getJobPosting().getCreatedBy().getId());
 
         System.out.println("=================================");
         System.out.println("JOB OWNER ID = "
