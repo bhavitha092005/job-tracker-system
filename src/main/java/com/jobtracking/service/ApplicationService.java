@@ -23,12 +23,10 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 public class ApplicationService {
@@ -72,52 +70,7 @@ public class ApplicationService {
         application.setStatus(ApplicationStatus.APPLIED);
 
         applicationRepository.save(application);
-    }
 
-        // EMAIL NOTIFICATIONS
-//        try {
-//            emailService.send(
-//                    candidate.getEmail(),
-//                    "Application Submitted",
-//                    "You successfully applied for: " + job.getTitle()
-//            );
-//
-//            emailService.send(
-//                    job.getCreatedBy().getEmail(),
-//                    "New Application Received",
-//                    "New candidate applied to: " + job.getTitle()
-//            );
-//
-//        } catch (Exception e) {
-//
-//            e.printStackTrace();   
-//        }
-//    }
-
-    // CANDIDATE APPLICATIONS
-    public List<ApplicationResponse> getMyApplications(CustomUserDetails userDetails) {
-
-        return applicationRepository.findByCandidateId(userDetails.getId())
-                .stream()
-                .map(this::mapToResponse)
-                .collect(Collectors.toList());
-    }
-
-    // HR APPLICATIONS
-    public List<ApplicationResponse> getApplicationsForJob(Long jobId,
-                                                           CustomUserDetails hrDetails) {
-
-        JobPosting job = jobPostingRepository.findById(jobId)
-                .orElseThrow(() -> new ResourceNotFoundException("Job not found"));
-
-        if (!job.getCreatedBy().getId().equals(hrDetails.getId())) {
-            throw new UnauthorizedActionException("Not allowed");
-        }
-
-        return applicationRepository.findByJobPostingId(jobId)
-                .stream()
-                .map(this::mapToResponse)
-                .toList();
     }
 
     // UPDATE STATUS
@@ -129,6 +82,20 @@ public class ApplicationService {
         JobApplication application = applicationRepository
                 .findWithJobAndCreatorById(applicationId)
                 .orElseThrow(() -> new ResourceNotFoundException("Application not found"));
+
+        System.out.println("=================================");
+        System.out.println("JOB OWNER ID = "
+                + application.getJobPosting().getCreatedBy().getId());
+
+        System.out.println("LOGGED IN HR ID = "
+                + hrDetails.getId());
+
+        System.out.println("JOB OWNER EMAIL = "
+                + application.getJobPosting().getCreatedBy().getEmail());
+
+        System.out.println("LOGGED IN EMAIL = "
+                + hrDetails.getUsername());
+        System.out.println("=================================");
 
         if (!application.getJobPosting().getCreatedBy().getId()
                 .equals(hrDetails.getId())) {
@@ -146,14 +113,6 @@ public class ApplicationService {
         }
 
         application.setStatus(next);
-
-        emailService.send(
-                application.getCandidate().getEmail(),
-                "Application Status Updated",
-                "Your application for "
-                        + application.getJobPosting().getTitle()
-                        + " is now: " + next
-        );
     }
 
     // DOWNLOAD RESUME
@@ -164,11 +123,6 @@ public class ApplicationService {
         JobApplication application = applicationRepository
                 .findWithJobAndCreatorById(applicationId)
                 .orElseThrow(() -> new ResourceNotFoundException("Application not found"));
-
-        if (!application.getJobPosting().getCreatedBy().getId()
-                .equals(hrDetails.getId())) {
-            throw new UnauthorizedActionException("Not allowed to download resume");
-        }
 
         Path filePath = Path.of(application.getResumePath());
 
@@ -186,8 +140,6 @@ public class ApplicationService {
                 .body(resource);
     }
 
-    // HELPERS
-
     private User getUser(Long userId) {
         return userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
@@ -203,7 +155,6 @@ public class ApplicationService {
         );
     }
 
-    // ✅ FIXED VALIDATION (Cloud Safe)
     private void validateResume(MultipartFile file) {
 
         if (file == null || file.isEmpty()) {
@@ -215,23 +166,12 @@ public class ApplicationService {
         }
 
         String filename = file.getOriginalFilename();
-        String contentType = file.getContentType();
 
-        boolean validType =
-                contentType != null &&
-                (contentType.equalsIgnoreCase("application/pdf")
-                || contentType.equalsIgnoreCase("application/octet-stream"));
-
-        boolean validName =
-                filename != null &&
-                filename.toLowerCase().endsWith(".pdf");
-
-        if (!validType && !validName) {
+        if (filename == null || !filename.toLowerCase().endsWith(".pdf")) {
             throw new BadRequestException("Only PDF resumes are allowed");
         }
     }
 
-    // ✅ HARDENED STORAGE LOGIC
     private String storeResume(MultipartFile file) {
 
         try {
@@ -239,7 +179,7 @@ public class ApplicationService {
             Path uploadDir = Path.of("uploads");
 
             if (!Files.exists(uploadDir)) {
-                Files.createDirectories(uploadDir);   
+                Files.createDirectories(uploadDir);
             }
 
             String filename = UUID.randomUUID() + ".pdf";
@@ -249,12 +189,41 @@ public class ApplicationService {
 
             return target.toString();
 
-        } catch (IOException e) {
+        } catch (Exception e) {
 
-            e.printStackTrace();   
+            e.printStackTrace();
             throw new RuntimeException("Failed to store resume");
         }
     }
+    
+ // ✅ CANDIDATE APPLICATIONS
+    public List<ApplicationResponse> getMyApplications(CustomUserDetails userDetails) {
+
+        return applicationRepository.findByCandidateId(userDetails.getId())
+                .stream()
+                .map(this::mapToResponse)
+                .toList();
+    }
+    
+ // ✅ HR APPLICATIONS FOR JOB
+    public List<ApplicationResponse> getApplicationsForJob(
+            Long jobId,
+            CustomUserDetails hrDetails) {
+
+        JobPosting job = jobPostingRepository.findById(jobId)
+                .orElseThrow(() -> new ResourceNotFoundException("Job not found"));
+
+        if (!job.getCreatedBy().getId().equals(hrDetails.getId())) {
+            throw new UnauthorizedActionException("Not allowed");
+        }
+
+        return applicationRepository.findByJobPostingId(jobId)
+                .stream()
+                .map(this::mapToResponse)
+                .toList();
+    }
+
+
 
     private boolean isValidTransition(ApplicationStatus current,
                                       ApplicationStatus next) {
@@ -275,4 +244,6 @@ public class ApplicationService {
                 return false;
         }
     }
+
+	
 }

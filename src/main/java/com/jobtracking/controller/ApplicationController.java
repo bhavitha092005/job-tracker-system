@@ -4,7 +4,9 @@ import com.jobtracking.dto.application.ApplicationResponse;
 import com.jobtracking.dto.application.UpdateStatusRequest;
 import com.jobtracking.security.CustomUserDetails;
 import com.jobtracking.service.ApplicationService;
+
 import jakarta.validation.Valid;
+
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -25,11 +27,11 @@ public class ApplicationController {
         this.applicationService = applicationService;
     }
 
-    // APPLY TO JOB 
+    // APPLY
     @PreAuthorize("hasRole('CANDIDATE')")
     @PostMapping(
-        value = "/apply",
-        consumes = MediaType.MULTIPART_FORM_DATA_VALUE
+            value = "/apply",
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE
     )
     public void apply(
             @RequestParam Long jobId,
@@ -39,8 +41,7 @@ public class ApplicationController {
         applicationService.applyToJob(jobId, resume, userDetails);
     }
 
-
-    //  CANDIDATE APPLICATIONS 
+    // CANDIDATE APPLICATIONS
     @PreAuthorize("hasRole('CANDIDATE')")
     @GetMapping("/me")
     public List<ApplicationResponse> myApplications(
@@ -49,7 +50,7 @@ public class ApplicationController {
         return applicationService.getMyApplications(userDetails);
     }
 
-    // HR: APPLICATIONS FOR A JOB 
+    // HR APPLICATIONS FOR JOB
     @PreAuthorize("hasRole('HR')")
     @GetMapping("/job/{jobId}")
     public List<ApplicationResponse> applicationsForJob(
@@ -59,7 +60,7 @@ public class ApplicationController {
         return applicationService.getApplicationsForJob(jobId, userDetails);
     }
 
-    //  HR: UPDATE APPLICATION STATUS 
+    // UPDATE STATUS
     @PreAuthorize("hasRole('HR')")
     @PatchMapping("/{applicationId}/status")
     public void updateStatus(
@@ -69,14 +70,14 @@ public class ApplicationController {
 
         applicationService.updateStatus(applicationId, request, userDetails);
     }
+
     // DOWNLOAD RESUME
-    @GetMapping("/resume/{applicationId}")
     @PreAuthorize("hasRole('HR')")
+    @GetMapping("/resume/{applicationId}")
     public ResponseEntity<Resource> downloadResume(
             @PathVariable Long applicationId,
-            @AuthenticationPrincipal CustomUserDetails hrDetails) {
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
 
-        return applicationService.downloadResume(applicationId, hrDetails);
+        return applicationService.downloadResume(applicationId, userDetails);
     }
-
 }
