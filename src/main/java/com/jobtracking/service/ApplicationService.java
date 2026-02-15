@@ -1,6 +1,5 @@
 package com.jobtracking.service;
 
-import com.jobtracking.config.FileStorageConfig;
 import com.jobtracking.dto.application.ApplicationResponse;
 import com.jobtracking.dto.application.UpdateStatusRequest;
 import com.jobtracking.entity.JobApplication;
@@ -39,24 +38,24 @@ public class ApplicationService {
     private final ApplicationRepository applicationRepository;
     private final JobPostingRepository jobPostingRepository;
     private final UserRepository userRepository;
-    private final EmailService emailService;   
+    private final EmailService emailService;
 
     public ApplicationService(ApplicationRepository applicationRepository,
                               JobPostingRepository jobPostingRepository,
                               UserRepository userRepository,
-                              EmailService emailService) {     // ✅ UPDATED
+                              EmailService emailService) {
+
         this.applicationRepository = applicationRepository;
         this.jobPostingRepository = jobPostingRepository;
         this.userRepository = userRepository;
-        this.emailService = emailService;      
+        this.emailService = emailService;
     }
 
-    //  APPLY TO JOB 
+    // APPLY TO JOB
     @Transactional
-    public void applyToJob(
-            Long jobId,
-            MultipartFile resume,
-            CustomUserDetails userDetails) {
+    public void applyToJob(Long jobId,
+                           MultipartFile resume,
+                           CustomUserDetails userDetails) {
 
         JobPosting job = jobPostingRepository.findById(jobId)
                 .orElseThrow(() -> new ResourceNotFoundException("Job not found"));
@@ -74,7 +73,7 @@ public class ApplicationService {
 
         applicationRepository.save(application);
 
-        //  EMAIL NOTIFICATIONS
+        // EMAIL NOTIFICATIONS
         emailService.send(
                 candidate.getEmail(),
                 "Application Submitted",
@@ -88,7 +87,7 @@ public class ApplicationService {
         );
     }
 
-    //  CANDIDATE APPLICATIONS
+    // CANDIDATE APPLICATIONS
     public List<ApplicationResponse> getMyApplications(CustomUserDetails userDetails) {
 
         return applicationRepository.findByCandidateId(userDetails.getId())
@@ -97,10 +96,9 @@ public class ApplicationService {
                 .collect(Collectors.toList());
     }
 
-    //  HR APPLICATIONS 
-    public List<ApplicationResponse> getApplicationsForJob(
-            Long jobId,
-            CustomUserDetails hrDetails) {
+    // HR APPLICATIONS
+    public List<ApplicationResponse> getApplicationsForJob(Long jobId,
+                                                           CustomUserDetails hrDetails) {
 
         JobPosting job = jobPostingRepository.findById(jobId)
                 .orElseThrow(() -> new ResourceNotFoundException("Job not found"));
@@ -115,12 +113,11 @@ public class ApplicationService {
                 .toList();
     }
 
-    // UPDATE STATUS 
+    // UPDATE STATUS
     @Transactional
-    public void updateStatus(
-            Long applicationId,
-            UpdateStatusRequest request,
-            CustomUserDetails hrDetails) {
+    public void updateStatus(Long applicationId,
+                             UpdateStatusRequest request,
+                             CustomUserDetails hrDetails) {
 
         JobApplication application = applicationRepository
                 .findWithJobAndCreatorById(applicationId)
@@ -143,7 +140,6 @@ public class ApplicationService {
 
         application.setStatus(next);
 
-      
         emailService.send(
                 application.getCandidate().getEmail(),
                 "Application Status Updated",
@@ -153,11 +149,10 @@ public class ApplicationService {
         );
     }
 
-    // DOWNLOAD RESUME 
+    // DOWNLOAD RESUME
     @Transactional(readOnly = true)
-    public ResponseEntity<Resource> downloadResume(
-            Long applicationId,
-            CustomUserDetails hrDetails) {
+    public ResponseEntity<Resource> downloadResume(Long applicationId,
+                                                   CustomUserDetails hrDetails) {
 
         JobApplication application = applicationRepository
                 .findWithJobAndCreatorById(applicationId)
@@ -184,7 +179,7 @@ public class ApplicationService {
                 .body(resource);
     }
 
-    // HELPERS 
+    // HELPERS
 
     private User getUser(Long userId) {
         return userRepository.findById(userId)
@@ -201,6 +196,7 @@ public class ApplicationService {
         );
     }
 
+    // ✅ FIXED VALIDATION (Cloud Safe)
     private void validateResume(MultipartFile file) {
 
         if (file == null || file.isEmpty()) {
@@ -211,31 +207,50 @@ public class ApplicationService {
             throw new BadRequestException("Resume size must be <= 5MB");
         }
 
-        if (!"application/pdf".equalsIgnoreCase(file.getContentType())) {
+        String filename = file.getOriginalFilename();
+        String contentType = file.getContentType();
+
+        boolean validType =
+                contentType != null &&
+                (contentType.equalsIgnoreCase("application/pdf")
+                || contentType.equalsIgnoreCase("application/octet-stream"));
+
+        boolean validName =
+                filename != null &&
+                filename.toLowerCase().endsWith(".pdf");
+
+        if (!validType && !validName) {
             throw new BadRequestException("Only PDF resumes are allowed");
         }
     }
 
+    // ✅ HARDENED STORAGE LOGIC
     private String storeResume(MultipartFile file) {
 
         try {
-            Files.createDirectories(FileStorageConfig.RESUME_UPLOAD_DIR);
+
+            Path uploadDir = Path.of("uploads");
+
+            if (!Files.exists(uploadDir)) {
+                Files.createDirectories(uploadDir);   
+            }
 
             String filename = UUID.randomUUID() + ".pdf";
-            Path target = FileStorageConfig.RESUME_UPLOAD_DIR.resolve(filename);
+            Path target = uploadDir.resolve(filename);
 
             Files.copy(file.getInputStream(), target);
 
             return target.toString();
 
         } catch (IOException e) {
+
+            e.printStackTrace();   
             throw new RuntimeException("Failed to store resume");
         }
     }
 
-    private boolean isValidTransition(
-            ApplicationStatus current,
-            ApplicationStatus next) {
+    private boolean isValidTransition(ApplicationStatus current,
+                                      ApplicationStatus next) {
 
         switch (current) {
 
