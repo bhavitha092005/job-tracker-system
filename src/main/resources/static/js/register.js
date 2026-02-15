@@ -1,4 +1,4 @@
-const API_BASE = "http://localhost:8080/api";
+const API_BASE = "https://meticulous-gentleness-production.up.railway.app/api";
 
 async function register() {
     const fullName = document.getElementById("fullName").value;
