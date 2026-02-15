@@ -1,8 +1,6 @@
 package com.jobtracking.config;
 
 import com.jobtracking.security.JwtAuthenticationFilter;
-
-
 import com.jobtracking.security.CustomUserDetailsService;
 
 import java.util.List;
@@ -19,15 +17,14 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
 import org.springframework.security.web.firewall.HttpFirewall;
 import org.springframework.security.web.firewall.StrictHttpFirewall;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
-import org.springframework.http.HttpMethod;
-import java.util.List;
-
 
 @Configuration
 @EnableMethodSecurity
@@ -46,54 +43,49 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
-    	http
-        .cors(cors -> {})
-        .csrf(csrf -> csrf.disable())
+        http
+            .cors(cors -> {})   
+            .csrf(csrf -> csrf.disable())
 
-            
-
-       
             .sessionManagement(session ->
                 session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             )
 
-            //  Authorization rules
             .authorizeHttpRequests(auth -> auth
 
-            	    .requestMatchers(
-            	        "/",
-            	        "/index.html",
-            	        "/register.html",
-            	        "/candidate.html",
-            	        "/hr.html",
-            	        "/admin.html",
-            	        "/css/**",
-            	        "/js/**"
-            	      
-            	    ).permitAll()
-           
-            	    .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+               
+                .requestMatchers(
+                    "/",
+                    "/index.html",
+                    "/register.html",
+                    "/candidate.html",
+                    "/hr.html",
+                    "/admin.html",
+                    "/css/**",
+                    "/js/**"
+                ).permitAll()
 
-            	    .requestMatchers("/api/auth/**").permitAll()
+                
+                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
-            	   
-            	    .requestMatchers("/api/applications/apply").hasRole("CANDIDATE")
-            	    .requestMatchers("/api/applications/resume/**").hasRole("HR")
-            	    .requestMatchers("/api/**").authenticated()
+               
+                .requestMatchers("/api/auth/**").permitAll()
 
+               
+                .requestMatchers("/api/applications/apply").hasRole("CANDIDATE")
+                .requestMatchers("/api/applications/resume/**").hasRole("HR")
 
-            	    .anyRequest().denyAll()
-            	)
+                
+                .requestMatchers("/api/**").authenticated()
 
+                .anyRequest().denyAll()
+            )
 
-
-   
             .userDetailsService(userDetailsService)
 
-   
             .addFilterBefore(
-                    jwtAuthenticationFilter,
-                    UsernamePasswordAuthenticationFilter.class
+                jwtAuthenticationFilter,
+                UsernamePasswordAuthenticationFilter.class
             );
 
         return http.build();
@@ -110,23 +102,30 @@ public class SecurityConfig {
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
-    
+
+  
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
+
         CorsConfiguration config = new CorsConfiguration();
 
-        config.setAllowedOrigins(List.of("http://localhost:8080"));
+        config.setAllowedOrigins(List.of(
+            "https://meticulous-gentleness-production.up.railway.app",
+            "http://localhost:8080"
+        ));
+
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source =
                 new UrlBasedCorsConfigurationSource();
+
         source.registerCorsConfiguration("/**", config);
 
         return source;
     }
-    
+
     @Bean
     public HttpFirewall allowMultipartFirewall() {
         StrictHttpFirewall firewall = new StrictHttpFirewall();
@@ -136,10 +135,9 @@ public class SecurityConfig {
         firewall.setAllowUrlEncodedPercent(true);
         return firewall;
     }
-    
+
     @Bean
     public WebSecurityCustomizer webSecurityCustomizer(HttpFirewall firewall) {
         return web -> web.httpFirewall(firewall);
     }
-
 }
