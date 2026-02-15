@@ -112,6 +112,10 @@
             <scope>test</scope>
         </dependency>
 
+<<<<<<< HEAD
+=======
+        
+>>>>>>> 232718cb5721f20b5476f04b7d575ca88e4b962a
     </dependencies>
 
     <build>
