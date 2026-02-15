@@ -82,25 +82,12 @@ public class ApplicationService {
         JobApplication application = applicationRepository
                 .findWithJobAndCreatorById(applicationId)
                 .orElseThrow(() -> new ResourceNotFoundException("Application not found"));
-         
-        
-        System.out.println("HR ID = " + hrDetails.getId());
-        System.out.println("JOB CREATOR ID = " +
-                application.getJobPosting().getCreatedBy().getId());
 
-        System.out.println("=================================");
-        System.out.println("JOB OWNER ID = "
-                + application.getJobPosting().getCreatedBy().getId());
-
-        System.out.println("LOGGED IN HR ID = "
-                + hrDetails.getId());
-
-        System.out.println("JOB OWNER EMAIL = "
-                + application.getJobPosting().getCreatedBy().getEmail());
-
-        System.out.println("LOGGED IN EMAIL = "
-                + hrDetails.getUsername());
-        System.out.println("=================================");
+System.out.println("========= DEBUG =========");
+System.out.println("TOKEN HR ID = " + hrDetails.getId());
+System.out.println("JOB OWNER ID = " +
+        application.getJobPosting().getCreatedBy().getId());
+System.out.println("=========================");
 
         if (!application.getJobPosting().getCreatedBy().getId()
                 .equals(hrDetails.getId())) {
