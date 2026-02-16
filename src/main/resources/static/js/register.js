@@ -7,7 +7,7 @@ async function register() {
     const password = document.getElementById("password").value.trim();
 
     if (!fullName || !email || !password) {
-        showToast("All fields are required");
+        alert("All fields are required");
         return;
     }
 
@@ -34,13 +34,13 @@ async function register() {
 
             throw new Error(errorMessage);
         }
-
-        showToast("Registered successfully");
+		
+		alert("Registered successfully");
         window.location.href = "index.html";
 
     } catch (err) {
 
         console.error("REGISTER ERROR:", err);
-        showToast(err.message);
+        alert(err.message);
     }
 }
