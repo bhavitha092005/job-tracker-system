@@ -1,16 +1,16 @@
-const API_BASE = "https://meticulous-gentleness-production.up.railway.app/api";
-
 async function register() {
-    const fullName = document.getElementById("fullName").value;
-    const email = document.getElementById("email").value;
-    const password = document.getElementById("password").value;
+
+    const fullName = document.getElementById("fullName").value.trim();
+    const email = document.getElementById("email").value.trim();
+    const password = document.getElementById("password").value.trim();
 
     if (!fullName || !email || !password) {
-        alert("All fields are required");
+        showToast("All fields are required");
         return;
     }
 
     try {
+
         const response = await fetch(`${API_BASE}/auth/register`, {
             method: "POST",
             headers: {
@@ -20,14 +20,25 @@ async function register() {
         });
 
         if (!response.ok) {
-            const err = await response.json();
-            throw new Error(err.message || "Registration failed");
+
+            let errorMessage = "Registration failed";
+
+            try {
+                const err = await response.json();
+                errorMessage = err.message || errorMessage;
+            } catch {
+                // ignore JSON parsing errors
+            }
+
+            throw new Error(errorMessage);
         }
 
-        alert("Registered successfully. Please login.");
+        showToast("Registered successfully");
         window.location.href = "index.html";
 
     } catch (err) {
-        alert(err.message);
+
+        console.error("REGISTER ERROR:", err);
+        showToast(err.message);
     }
 }

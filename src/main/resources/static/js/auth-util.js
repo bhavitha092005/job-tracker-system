@@ -1,6 +1,4 @@
-const API_BASE = "https://meticulous-gentleness-production.up.railway.app/api";
-
-//  TOAST 
+const API_BASE = `${window.location.origin}/api`;
 
 function showToast(message) {
     const toast = document.getElementById("toast");
@@ -17,8 +15,6 @@ function showToast(message) {
         toast.classList.remove("show");
     }, 2500);
 }
-
-
 
 function requireRole(role) {
 
@@ -39,7 +35,6 @@ function requireRole(role) {
             return null;
         }
 
-        // ✅ Role check
         if (!payload.roles.includes(role)) {
             showToast("Access denied");
             redirectToLogin();
@@ -55,8 +50,6 @@ function requireRole(role) {
         return null;
     }
 }
-
-// ================= LOGOUT =================
 
 function logout() {
     localStorage.removeItem("token");

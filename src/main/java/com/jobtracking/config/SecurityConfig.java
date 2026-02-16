@@ -110,7 +110,7 @@ public class SecurityConfig {
         CorsConfiguration config = new CorsConfiguration();
 
         config.setAllowedOrigins(List.of(
-            "https://meticulous-gentleness-production.up.railway.app",
+//            "https://meticulous-gentleness-production.up.railway.app",
             "http://localhost:8080"
         ));
 
