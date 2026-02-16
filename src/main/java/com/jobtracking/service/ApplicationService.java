@@ -83,12 +83,6 @@ public class ApplicationService {
                 .findWithJobAndCreatorById(applicationId)
                 .orElseThrow(() -> new ResourceNotFoundException("Application not found"));
 
-System.out.println("========= DEBUG =========");
-System.out.println("TOKEN HR ID = " + hrDetails.getId());
-System.out.println("JOB OWNER ID = " +
-        application.getJobPosting().getCreatedBy().getId());
-System.out.println("=========================");
-
         if (!application.getJobPosting().getCreatedBy().getId()
                 .equals(hrDetails.getId())) {
 
@@ -105,7 +99,16 @@ System.out.println("=========================");
         }
 
         application.setStatus(next);
+
+        User candidate = application.getCandidate();
+
+        emailService.send(
+                candidate.getEmail(),
+                "Application Status Updated",
+                buildStatusMessage(application)
+        );
     }
+
 
     // DOWNLOAD RESUME
     @Transactional(readOnly = true)
@@ -215,6 +218,14 @@ System.out.println("=========================");
                 .toList();
     }
 
+    private String buildStatusMessage(JobApplication application) {
+
+        return "Hello " + application.getCandidate().getFullName() + ",\n\n"
+                + "Your application for the job:\n"
+                + application.getJobPosting().getTitle()
+                + "\n\nStatus: " + application.getStatus()
+                + "\n\nRegards,\nJob Tracker Team";
+    }
 
 
     private boolean isValidTransition(ApplicationStatus current,
