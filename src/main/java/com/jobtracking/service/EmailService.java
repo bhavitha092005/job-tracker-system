@@ -1,24 +1,29 @@
 package com.jobtracking.service;
 
 import com.jobtracking.entity.enums.ApplicationStatus;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
 @Service
 public class EmailService {
 
-    // ================= CORE EMAIL METHOD =================
+    private final JavaMailSender mailSender;
+
+    public EmailService(JavaMailSender mailSender) {
+        this.mailSender = mailSender;
+    }
 
     private void sendEmail(String toEmail, String subject, String body) {
 
-        System.out.println("\n====== EMAIL SENT ======");
-        System.out.println("TO: " + toEmail);
-        System.out.println("SUBJECT: " + subject);
-        System.out.println("BODY:");
-        System.out.println(body);
-        System.out.println("========================\n");
-    }
+        SimpleMailMessage message = new SimpleMailMessage();
 
-    // ================= APPLICATION STATUS EMAIL =================
+        message.setTo(toEmail);
+        message.setSubject(subject);
+        message.setText(body);
+
+        mailSender.send(message);
+    }
 
     public void sendApplicationStatusUpdate(
             String toEmail,
@@ -33,7 +38,7 @@ public class EmailService {
         switch (status) {
 
             case REVIEWED:
-                message = "Your application has been successfully reviewed by our HR team.";
+                message = "Your application has been reviewed by our HR team.";
                 break;
 
             case INTERVIEW:
@@ -41,11 +46,11 @@ public class EmailService {
                 break;
 
             case HIRED:
-                message = "Excellent news! We are pleased to inform you that you have been selected for the position.";
+                message = "Excellent news! You have been selected for the position.";
                 break;
 
             case REJECTED:
-                message = "Thank you for your interest. We regret to inform you that you were not selected for this position.";
+                message = "Thank you for applying. We regret to inform you that you were not selected.";
                 break;
 
             default:
@@ -60,8 +65,6 @@ public class EmailService {
                 %s
 
                 %s
-
-                Thank you for using Job Tracker System.
 
                 Best regards,
                 Recruitment Team
