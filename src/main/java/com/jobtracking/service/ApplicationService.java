@@ -1,5 +1,6 @@
 package com.jobtracking.service;
 
+import com.jobtracking.config.FileStorageConfig;
 import com.jobtracking.dto.application.ApplicationResponse;
 import com.jobtracking.dto.application.UpdateStatusRequest;
 import com.jobtracking.entity.JobApplication;
@@ -14,19 +15,21 @@ import com.jobtracking.repository.JobPostingRepository;
 import com.jobtracking.repository.UserRepository;
 import com.jobtracking.security.CustomUserDetails;
 
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
-
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 public class ApplicationService {
@@ -36,24 +39,27 @@ public class ApplicationService {
     private final ApplicationRepository applicationRepository;
     private final JobPostingRepository jobPostingRepository;
     private final UserRepository userRepository;
-    private final EmailService emailService;
+    private final EmailService emailService; 
 
-    public ApplicationService(ApplicationRepository applicationRepository,
-                              JobPostingRepository jobPostingRepository,
-                              UserRepository userRepository,
-                              EmailService emailService) {
+    public ApplicationService(
+            ApplicationRepository applicationRepository,
+            JobPostingRepository jobPostingRepository,
+            UserRepository userRepository,
+            EmailService emailService) { 
 
         this.applicationRepository = applicationRepository;
         this.jobPostingRepository = jobPostingRepository;
         this.userRepository = userRepository;
-        this.emailService = emailService;
+        this.emailService = emailService; 
     }
 
-    // APPLY TO JOB
+    // ================= APPLY TO JOB =================
+
     @Transactional
-    public void applyToJob(Long jobId,
-                           MultipartFile resume,
-                           CustomUserDetails userDetails) {
+    public void applyToJob(
+            Long jobId,
+            MultipartFile resume,
+            CustomUserDetails userDetails) {
 
         JobPosting job = jobPostingRepository.findById(jobId)
                 .orElseThrow(() -> new ResourceNotFoundException("Job not found"));
@@ -61,6 +67,7 @@ public class ApplicationService {
         User candidate = getUser(userDetails.getId());
 
         validateResume(resume);
+
         String resumePath = storeResume(resume);
 
         JobApplication application = new JobApplication();
@@ -70,14 +77,44 @@ public class ApplicationService {
         application.setStatus(ApplicationStatus.APPLIED);
 
         applicationRepository.save(application);
-
     }
 
-    // UPDATE STATUS
+    // ================= CANDIDATE APPLICATIONS =================
+
+    public List<ApplicationResponse> getMyApplications(CustomUserDetails userDetails) {
+
+        return applicationRepository.findByCandidateId(userDetails.getId())
+                .stream()
+                .map(this::mapToResponse)
+                .collect(Collectors.toList());
+    }
+
+    // ================= HR APPLICATIONS =================
+
+    public List<ApplicationResponse> getApplicationsForJob(
+            Long jobId,
+            CustomUserDetails hrDetails) {
+
+        JobPosting job = jobPostingRepository.findById(jobId)
+                .orElseThrow(() -> new ResourceNotFoundException("Job not found"));
+
+        if (!job.getCreatedBy().getId().equals(hrDetails.getId())) {
+            throw new UnauthorizedActionException("Not allowed");
+        }
+
+        return applicationRepository.findByJobPostingId(jobId)
+                .stream()
+                .map(this::mapToResponse)
+                .toList();
+    }
+
+    // ================= UPDATE STATUS =================
+
     @Transactional
-    public void updateStatus(Long applicationId,
-                             UpdateStatusRequest request,
-                             CustomUserDetails hrDetails) {
+    public void updateStatus(
+            Long applicationId,
+            UpdateStatusRequest request,
+            CustomUserDetails hrDetails) {
 
         JobApplication application = applicationRepository
                 .findWithJobAndCreatorById(applicationId)
@@ -98,35 +135,33 @@ public class ApplicationService {
             throw new BadRequestException("Invalid status transition");
         }
 
-        //  STATUS UPDATE 
+        // ✅ Update status
         application.setStatus(next);
 
-        try {
-
-            User candidate = application.getCandidate();
-
-            emailService.send(
-                    candidate.getEmail(),
-                    "Application Status Updated",
-                    buildStatusMessage(application)
-            );
-
-        } catch (Exception e) {
-
-            System.out.println("⚠ MAIL FAILED: " + e.getMessage());
-        }
+        // ✅ SEND EMAIL ⭐⭐⭐⭐⭐
+        emailService.sendApplicationStatusUpdate(
+                application.getCandidate().getEmail(),
+                application.getCandidate().getFullName(),
+                application.getJobPosting().getTitle(),
+                next
+        );
     }
 
+    // ================= DOWNLOAD RESUME =================
 
-
-    // DOWNLOAD RESUME
     @Transactional(readOnly = true)
-    public ResponseEntity<Resource> downloadResume(Long applicationId,
-                                                   CustomUserDetails hrDetails) {
+    public ResponseEntity<Resource> downloadResume(
+            Long applicationId,
+            CustomUserDetails hrDetails) {
 
         JobApplication application = applicationRepository
                 .findWithJobAndCreatorById(applicationId)
                 .orElseThrow(() -> new ResourceNotFoundException("Application not found"));
+
+        if (!application.getJobPosting().getCreatedBy().getId()
+                .equals(hrDetails.getId())) {
+            throw new UnauthorizedActionException("Not allowed to download resume");
+        }
 
         Path filePath = Path.of(application.getResumePath());
 
@@ -139,10 +174,12 @@ public class ApplicationService {
         return ResponseEntity.ok()
                 .header(
                         HttpHeaders.CONTENT_DISPOSITION,
-                        "attachment; filename=\"" + filePath.getFileName().toString() + "\""
+                        "attachment; filename=\"" + filePath.getFileName() + "\""
                 )
                 .body(resource);
     }
+
+    // ================= HELPERS =================
 
     private User getUser(Long userId) {
         return userRepository.findById(userId)
@@ -169,9 +206,7 @@ public class ApplicationService {
             throw new BadRequestException("Resume size must be <= 5MB");
         }
 
-        String filename = file.getOriginalFilename();
-
-        if (filename == null || !filename.toLowerCase().endsWith(".pdf")) {
+        if (!"application/pdf".equalsIgnoreCase(file.getContentType())) {
             throw new BadRequestException("Only PDF resumes are allowed");
         }
     }
@@ -179,66 +214,28 @@ public class ApplicationService {
     private String storeResume(MultipartFile file) {
 
         try {
-
-            Path uploadDir = Path.of("uploads");
-
-            if (!Files.exists(uploadDir)) {
-                Files.createDirectories(uploadDir);
-            }
+            Files.createDirectories(FileStorageConfig.RESUME_UPLOAD_DIR);
 
             String filename = UUID.randomUUID() + ".pdf";
-            Path target = uploadDir.resolve(filename);
 
-            Files.copy(file.getInputStream(), target);
+            Path target = FileStorageConfig.RESUME_UPLOAD_DIR.resolve(filename);
+
+            Files.copy(
+                    file.getInputStream(),
+                    target,
+                    StandardCopyOption.REPLACE_EXISTING
+            );
 
             return target.toString();
 
-        } catch (Exception e) {
-
-            e.printStackTrace();
+        } catch (IOException e) {
             throw new RuntimeException("Failed to store resume");
         }
     }
-    
- // ✅ CANDIDATE APPLICATIONS
-    public List<ApplicationResponse> getMyApplications(CustomUserDetails userDetails) {
 
-        return applicationRepository.findByCandidateId(userDetails.getId())
-                .stream()
-                .map(this::mapToResponse)
-                .toList();
-    }
-    
- // ✅ HR APPLICATIONS FOR JOB
-    public List<ApplicationResponse> getApplicationsForJob(
-            Long jobId,
-            CustomUserDetails hrDetails) {
-
-        JobPosting job = jobPostingRepository.findById(jobId)
-                .orElseThrow(() -> new ResourceNotFoundException("Job not found"));
-
-        if (!job.getCreatedBy().getId().equals(hrDetails.getId())) {
-            throw new UnauthorizedActionException("Not allowed");
-        }
-
-        return applicationRepository.findByJobPostingId(jobId)
-                .stream()
-                .map(this::mapToResponse)
-                .toList();
-    }
-
-    private String buildStatusMessage(JobApplication application) {
-
-        return "Hello " + application.getCandidate().getFullName() + ",\n\n"
-                + "Your application for the job:\n"
-                + application.getJobPosting().getTitle()
-                + "\n\nStatus: " + application.getStatus()
-                + "\n\nRegards,\nJob Tracker Team";
-    }
-
-
-    private boolean isValidTransition(ApplicationStatus current,
-                                      ApplicationStatus next) {
+    private boolean isValidTransition(
+            ApplicationStatus current,
+            ApplicationStatus next) {
 
         switch (current) {
 
@@ -256,6 +253,4 @@ public class ApplicationService {
                 return false;
         }
     }
-
-	
 }
