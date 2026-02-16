@@ -1,3 +1,5 @@
+const API_BASE = `${window.location.origin}/api`;
+
 async function register() {
 
     const fullName = document.getElementById("fullName").value.trim();
