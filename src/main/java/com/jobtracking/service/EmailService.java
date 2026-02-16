@@ -1,74 +1,69 @@
 package com.jobtracking.service;
 
-import com.jobtracking.entity.enums.ApplicationStatus;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
+import com.sendgrid.*;
+import com.sendgrid.helpers.mail.Mail;
+import com.sendgrid.helpers.mail.objects.Content;
+import com.sendgrid.helpers.mail.objects.Email;
+
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 @Service
 public class EmailService {
 
-    private final JavaMailSender mailSender;
+    @Value("${sendgrid.api.key}")
+    private String apiKey;
 
-    public EmailService(JavaMailSender mailSender) {
-        this.mailSender = mailSender;
-    }
+    @Value("${sendgrid.from.email}")
+    private String fromEmail;
 
     private void sendEmail(String toEmail, String subject, String body) {
 
-        SimpleMailMessage message = new SimpleMailMessage();
+        try {
+            Email from = new Email(fromEmail);
+            Email to = new Email(toEmail);
 
-        message.setTo(toEmail);
-        message.setSubject(subject);
-        message.setText(body);
+            Content content = new Content("text/plain", body);
 
-        mailSender.send(message);
+            Mail mail = new Mail(from, subject, to, content);
+
+            SendGrid sg = new SendGrid(apiKey);
+            Request request = new Request();
+
+            request.setMethod(Method.POST);
+            request.setEndpoint("mail/send");
+            request.setBody(mail.build());
+
+            Response response = sg.api(request);
+
+            System.out.println("SENDGRID STATUS: " + response.getStatusCode());
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            throw new RuntimeException("Failed to send email");
+        }
     }
 
     public void sendApplicationStatusUpdate(
             String toEmail,
             String candidateName,
             String jobTitle,
-            ApplicationStatus status) {
+            Object status) {
 
         String subject = "Application Status Update";
-
-        String message;
-
-        switch (status) {
-
-            case REVIEWED:
-                message = "Your application has been reviewed by our HR team.";
-                break;
-
-            case INTERVIEW:
-                message = "Congratulations! You have been shortlisted for the interview stage.";
-                break;
-
-            case HIRED:
-                message = "Excellent news! You have been selected for the position.";
-                break;
-
-            case REJECTED:
-                message = "Thank you for applying. We regret to inform you that you were not selected.";
-                break;
-
-            default:
-                message = "Your application status has been updated.";
-        }
 
         String body = """
                 Dear %s,
 
-                Your application for the position:
+                Your application for:
 
                 %s
 
-                %s
+                Current Status: %s
 
                 Best regards,
                 Recruitment Team
-                """.formatted(candidateName, jobTitle, message);
+                """.formatted(candidateName, jobTitle, status);
 
         sendEmail(toEmail, subject, body);
     }
