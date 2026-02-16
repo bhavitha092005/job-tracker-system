@@ -44,7 +44,7 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
         http
-            .cors(cors -> {})   
+            .cors(cors -> {})
             .csrf(csrf -> csrf.disable())
 
             .sessionManagement(session ->
@@ -53,7 +53,6 @@ public class SecurityConfig {
 
             .authorizeHttpRequests(auth -> auth
 
-               
                 .requestMatchers(
                     "/",
                     "/index.html",
@@ -65,17 +64,13 @@ public class SecurityConfig {
                     "/js/**"
                 ).permitAll()
 
-                
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
-               
                 .requestMatchers("/api/auth/**").permitAll()
 
-               
                 .requestMatchers("/api/applications/apply").hasRole("CANDIDATE")
                 .requestMatchers("/api/applications/resume/**").hasRole("HR")
 
-                
                 .requestMatchers("/api/**").authenticated()
 
                 .anyRequest().denyAll()
@@ -92,6 +87,29 @@ public class SecurityConfig {
     }
 
     @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+
+        CorsConfiguration config = new CorsConfiguration();
+
+        config.setAllowedOriginPatterns(List.of("*"));
+
+        config.setAllowedMethods(List.of(
+                "GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"
+        ));
+
+        config.setAllowedHeaders(List.of("*"));
+
+        config.setAllowCredentials(true);
+
+        UrlBasedCorsConfigurationSource source =
+                new UrlBasedCorsConfigurationSource();
+
+        source.registerCorsConfiguration("/**", config);
+
+        return source;
+    }
+
+    @Bean
     public AuthenticationManager authenticationManager(
             AuthenticationConfiguration authenticationConfiguration
     ) throws Exception {
@@ -101,29 +119,6 @@ public class SecurityConfig {
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
-    }
-
-  
-    @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
-
-        CorsConfiguration config = new CorsConfiguration();
-
-        config.setAllowedOrigins(List.of(
-//            "https://meticulous-gentleness-production.up.railway.app",
-            "http://localhost:8080"
-        ));
-
-        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        config.setAllowedHeaders(List.of("*"));
-        config.setAllowCredentials(true);
-
-        UrlBasedCorsConfigurationSource source =
-                new UrlBasedCorsConfigurationSource();
-
-        source.registerCorsConfiguration("/**", config);
-
-        return source;
     }
 
     @Bean
