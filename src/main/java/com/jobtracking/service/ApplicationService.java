@@ -98,16 +98,25 @@ public class ApplicationService {
             throw new BadRequestException("Invalid status transition");
         }
 
+        //  STATUS UPDATE 
         application.setStatus(next);
 
-        User candidate = application.getCandidate();
+        try {
 
-        emailService.send(
-                candidate.getEmail(),
-                "Application Status Updated",
-                buildStatusMessage(application)
-        );
+            User candidate = application.getCandidate();
+
+            emailService.send(
+                    candidate.getEmail(),
+                    "Application Status Updated",
+                    buildStatusMessage(application)
+            );
+
+        } catch (Exception e) {
+
+            System.out.println("⚠ MAIL FAILED: " + e.getMessage());
+        }
     }
+
 
 
     // DOWNLOAD RESUME
