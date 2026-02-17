@@ -6,6 +6,7 @@ A full-stack web application designed to streamline recruitment workflows by ena
 
 🔗 Application URL:
 https://meticulous-gentleness-production.up.railway.app/
+__________________________________________________________________________________________________________________________________________________________________
 
 Overview
 
@@ -24,8 +25,10 @@ Application status tracking
 Automated email notifications
 
 This project emphasizes backend architecture, security, and workflow-driven design.
+__________________________________________________________________________________________________________________________________________________________________
 
 Tech Stack
+
 Backend
 
 Java
@@ -41,7 +44,7 @@ Spring Data JPA
 REST APIs
 
 BCrypt Password Encryption
-
+__________________________________________________________________________________________________________________________________________________________________
 Frontend
 
 HTML
@@ -49,15 +52,15 @@ HTML
 CSS
 
 JavaScript
-
+__________________________________________________________________________________________________________________________________________________________________
 Database
 
 MySQL (or your DB)
-
+__________________________________________________________________________________________________________________________________________________________________
 Integrations
 
 SendGrid (Email Notifications)
-
+__________________________________________________________________________________________________________________________________________________________________
 Key Features
 Authentication & Security
 
@@ -94,11 +97,11 @@ User-specific data isolation
 Validation and error handling
 
 System Architecture
-
+__________________________________________________________________________________________________________________________________________________________________
 Layered architecture:
 
 Controller → Service → Repository → Database
-
+__________________________________________________________________________________________________________________________________________________________________
 
 Ensures clean separation of concerns and maintainable design.
 
@@ -117,7 +120,7 @@ job-tracker-system/
 │   └── application.properties
 │
 └── README.md
-
+__________________________________________________________________________________________________________________________________________________________________
 Database Schema
 Users
 
@@ -148,7 +151,7 @@ job_id
 user_id
 
 status
-
+__________________________________________________________________________________________________________________________________________________________________
 Application Flow
 
 Users register and authenticate securely
@@ -162,10 +165,9 @@ Applications stored via relational mapping
 HR updates statuses
 
 SendGrid triggers notifications
-
+__________________________________________________________________________________________________________________________________________________________________
 How to Run the Project
 git clone https://github.com/bhavitha092005/job-tracker-system.git
-
 
 Configure DB:
 
@@ -176,7 +178,7 @@ spring.jpa.hibernate.ddl-auto=update
 
 
 Run Spring Boot → Open browser.
-
+__________________________________________________________________________________________________________________________________________________________________
 Key Technical Concepts Implemented
 
 Authentication & Authorization
@@ -202,7 +204,7 @@ Advanced filtering
 Microservices architecture
 
 Cloud deployment
-
+__________________________________________________________________________________________________________________________________________________________________
 Author
 
 Pala Bhavitha | 
