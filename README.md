@@ -1,142 +1,231 @@
-# Job Tracker System
+📌 Job Tracker System
 
-A full-stack Job Tracking System built using **Java, Spring Boot, Spring Security, REST APIs, MySQL**, and a **vanilla HTML/CSS/JavaScript frontend**.  
-The application supports **role-based authentication** using **JWT** and demonstrates real-world backend and frontend integration.
+A secure full-stack web application designed to streamline job posting and candidate application workflows through authentication, role-based access control, and automated communication mechanisms.
 
----
+🚀 Overview
 
-## 🚀 Features
+The Job Tracker System enables structured interaction between HR users and Candidates, providing a centralized platform for job creation, application management, and status-driven workflows.
 
-### 🔐 Authentication & Authorization
-- JWT-based authentication
-- Secure login & registration
-- Role-based access control using Spring Security
+The application emphasizes security, clean architecture, and real-world system design using Spring Boot and modern web technologies.
 
-### 👥 Roles
-- **ADMIN**
-  - Create HR users
-- **HR**
-  - Create job postings
-  - View applications for their jobs
-  - Update application status
-  - Download candidate resumes
-- **CANDIDATE**
-  - Register & login
-  - View available jobs
-  - Apply for jobs with resume upload
-  - Track application status
+✅ Key Features
+🔐 Authentication & Security
 
-### 📄 Job Application Workflow
-1. Admin creates HR
-2. HR creates job postings
-3. Candidate applies with resume (PDF)
-4. HR reviews applications
-5. HR updates application status
-6. Candidate sees real-time status updates
+Secure login and registration using Spring Security
 
----
+BCrypt password encryption
 
-## 🛠 Tech Stack
+Role-based access control (HR / Candidate)
 
-### Backend
-- Java 17
-- Spring Boot
-- Spring Security
-- Spring Data JPA
-- RESTful APIs
-- JWT Authentication
-- MySQL Database
-- Maven
+Protected endpoints and user-specific data isolation
 
-### Frontend
-- HTML
-- CSS (custom, no framework)
-- JavaScript (Vanilla JS)
-- Fetch API
+👩‍💼 HR Functionalities
 
-### Database
-- MySQL
-- JPA/Hibernate ORM
+Create and manage job postings
 
----
+View candidate applications
 
-## 🗂 Project Structure
+Update application statuses
 
-src/main/java/com/jobtracking
-│
-├── config # Security, CORS, File storage config
-├── controller # REST Controllers
-├── dto # Request/Response DTOs
-├── entity # JPA Entities
-├── enums # Enums (Roles, Status)
-├── exception # Custom exceptions & handlers
-├── repository # JPA Repositories
-├── security # JWT, Filters, UserDetails
-├── service # Business logic
-└── JobTrackerSystemApplication.java
+Trigger automated status notifications
 
-src/main/resources/static
-│
-├── index.html
-├── register.html
-├── admin.html
-├── hr.html
-├── candidate.html
-├── css
-│ └── style.css
-└── js
-├── auth.js
-├── admin.js
-├── hr.js
-├── candidate.js
-└── register.js
+👨‍💻 Candidate Functionalities
+
+Secure account creation and login
+
+Browse available job listings
+
+Apply for jobs
+
+Track application statuses
+
+📧 Email Notification System
+
+Integrated SendGrid Email API
+
+Automated application status updates
+
+Practical exposure to email notification workflows
+
+📊 Workflow & Data Management
+
+Status-driven application lifecycle
+
+RESTful API-based communication
+
+Persistent relational data modeling
+
+Validation and error handling
+
+🛠 Tech Stack
+🔹 Backend
+
+Java
+
+Spring Boot
+
+Spring Security
+
+Spring MVC
+
+Spring Data JPA
+
+REST APIs
+
+BCrypt Password Encryption
+
+SendGrid Email Integration
+
+MySQL Database
+
+🔹 Frontend
+
+HTML5
+
+CSS3
+
+JavaScript
+
+🔹 Tools & Technologies
+
+Git & GitHub
+
+Postman
+
+IntelliJ / STS / Eclipse
+
+🏗 Architecture & Design
+
+The application follows a layered architecture pattern:
+
+Controller → Service → Repository → Database
 
 
----
+✔ Separation of concerns
+✔ Clean business logic handling
+✔ Scalable backend structure
+✔ RESTful API-driven interaction
 
-## 🔑 Security Implementation
+🔐 Security Concepts Implemented
 
-- Stateless authentication using JWT
-- Custom `JwtAuthenticationFilter`
-- Role-based endpoint protection
-- Password hashing using BCrypt
-- Method-level security using `@PreAuthorize`
+Authentication & Authorization
 
----
+Role-Based Access Control (RBAC)
 
-## 📦 API Highlights
+Password Encryption (BCrypt)
 
-### Auth
-- `POST /api/auth/register`
-- `POST /api/auth/login`
+Endpoint Protection
 
-### Admin
-- `POST /api/admin/create-hr`
+User-Specific Data Isolation
 
-### HR
-- `POST /api/jobs`
-- `GET /api/applications/job/{jobId}`
-- `PATCH /api/applications/{id}/status`
-- `GET /api/applications/resume/{id}`
+🗄 Database Schema
+Users Table
 
-### Candidate
-- `GET /api/jobs`
-- `POST /api/applications/apply`
-- `GET /api/applications/me`
+id
 
----
+username
 
-## 📁 Resume Upload
-- Accepts **PDF only**
-- Max size: **2MB**
-- Stored securely on server
-- Download access restricted to HR who owns the job
+password (BCrypt encrypted)
 
----
+role (HR / Candidate)
 
-## ⚙️ How to Run Locally
+Jobs Table
 
-### 1️⃣ Clone Repository
-```bash
-git clone <your-repo-url>
-cd job-tracker-system
+id
+
+job_title
+
+company_name
+
+description
+
+created_by
+
+Applications Table
+
+id
+
+job_id (foreign key)
+
+user_id (foreign key)
+
+status (APPLIED, INTERVIEW, OFFER, REJECTED)
+
+🔄 Application Flow
+
+Users register with credentials securely encrypted using BCrypt.
+
+Spring Security handles authentication and authorization.
+
+HR users create job postings via protected endpoints.
+
+Candidates browse and apply for jobs.
+
+Applications are stored with relational mappings.
+
+HR updates application statuses.
+
+SendGrid triggers automated email notifications.
+
+🌐 API & Backend Highlights
+
+RESTful API Design
+
+Secure Endpoint Mapping
+
+Business Logic Layer Separation
+
+Entity Relationship Mapping (JPA)
+
+Validation & Error Handling
+
+🚀 Deployment
+
+The application is deployed and accessible online.
+
+🔗 Live Application:
+https://https://meticulous-gentleness-production.up.railway.app/
+
+🔗 GitHub Repository:
+https://github.com/bhavitha092005/job-tracker-system
+
+📸 Application Preview
+
+screenshots/login.png  
+screenshots/dashboard.png  
+screenshots/job-posting.png
+
+📚 Learning Outcomes
+
+Designing RESTful APIs with Spring Boot
+
+Implementing authentication using Spring Security
+
+Applying secure password handling (BCrypt)
+
+Role-based workflow design
+
+Database modeling with JPA
+
+Email service integration (SendGrid)
+
+Debugging security and persistence workflows
+
+🔮 Future Enhancements
+
+JWT-based Stateless Authentication
+
+Advanced Role Authorization Rules
+
+Pagination & Filtering
+
+Microservices-based Architecture
+
+Cloud Deployment
+
+👩‍💻 Author
+
+Pala Bhavitha
+Full Stack Developer
+
+Focused on designing and developing full-stack web applications using Java, Spring Boot, and Spring Security. Actively advancing expertise in React, Next.js, and microservices architecture, with an emphasis on building scalable, secure, and production-ready systems.
