@@ -166,10 +166,12 @@ HR updates statuses
 
 SendGrid triggers notifications
 __________________________________________________________________________________________________________________________________________________________________
-How to Run the Project
+How to Run the Project : 
+
 git clone https://github.com/bhavitha092005/job-tracker-system.git
 
 Configure DB:
+
 
 spring.datasource.url=jdbc:mysql://localhost:3306/job_tracker
 spring.datasource.username=your_username
