@@ -1,79 +1,211 @@
 📌 Job Tracker System
 
-A secure full-stack web application designed to manage job postings and candidate application workflows using role-based access control and RESTful architecture.
+A full-stack web application designed to streamline recruitment workflows by enabling HR users to manage job postings and candidates to track their job applications.
 
-🚀 Core Functionality
+🚀 Live Demo
 
-HR Users
+🔗 Application URL:
+https://meticulous-gentleness-production.up.railway.app/
 
-Create and manage job postings
+Overview
 
-Review candidate applications
+The Job Tracker System provides a structured platform for managing hiring workflows with secure role-based interactions.
 
-Update application statuses
+The system allows:
 
-Trigger automated notifications
+HR users to create and manage job postings
 
-Candidates
+Candidates to browse and apply for jobs
 
-Secure registration and login
+Role-based access control
 
-Browse available jobs
+Application status tracking
 
-Apply for positions
+Automated email notifications
 
-Track application status
+This project emphasizes backend architecture, security, and workflow-driven design.
 
-🔐 Security & Access Control
+Tech Stack
+Backend
 
-Spring Security Authentication
+Java
 
-Role-Based Access Control (HR / Candidate)
+Spring Boot
+
+Spring MVC
+
+Spring Security
+
+Spring Data JPA
+
+REST APIs
 
 BCrypt Password Encryption
 
-Protected API Endpoints
-
-📧 Notification System
-
-SendGrid Email Integration
-
-Automated Status Updates
-
-🛠 Tech Stack
-
-Backend
-Java • Spring Boot • Spring Security • REST APIs • Spring Data JPA • MySQL
-
 Frontend
-HTML • CSS • JavaScript
 
-🏗 Architecture
+HTML
 
-Layered Design Pattern:
+CSS
+
+JavaScript
+
+Database
+
+MySQL (or your DB)
+
+Integrations
+
+SendGrid (Email Notifications)
+
+Key Features
+Authentication & Security
+
+Secure registration and login
+
+Password encryption using BCrypt
+
+Role-based authorization (HR / Candidate)
+
+HR Functionalities
+
+Create and manage job postings
+
+View candidate applications
+
+Update application statuses
+
+Send automated email updates
+
+Candidate Functionalities
+
+Browse available jobs
+
+Apply for job postings
+
+Track application statuses
+
+Workflow Management
+
+Status-driven application tracking
+
+User-specific data isolation
+
+Validation and error handling
+
+System Architecture
+
+Layered architecture:
 
 Controller → Service → Repository → Database
 
-🌐 Deployment
 
-Live Application
-https://meticulous-gentleness-production.up.railway.app/
+Ensures clean separation of concerns and maintainable design.
 
-Repository
-https://github.com/bhavitha092005/job-tracker-system
+Project Structure
+job-tracker-system/
+│
+├── src/main/java/com/jobtracker
+│   ├── controller
+│   ├── service
+│   ├── repository
+│   ├── entity
+│   └── config
+│
+├── src/main/resources
+│   ├── static
+│   └── application.properties
+│
+└── README.md
 
-📸 Application Preview
+Database Schema
+Users
 
-(Add Screenshots)
+id
+
+username
+
+password (BCrypt encrypted)
+
+role
+
+Jobs
+
+id
+
+title
+
+description
+
+requirements
+
+Applications
+
+id
+
+job_id
+
+user_id
+
+status
+
+Application Flow
+
+Users register and authenticate securely
+
+HR users create job postings
+
+Candidates browse and apply
+
+Applications stored via relational mapping
+
+HR updates statuses
+
+SendGrid triggers notifications
+
+How to Run the Project
+git clone https://github.com/bhavitha092005/job-tracker-system.git
 
 
+Configure DB:
+
+spring.datasource.url=jdbc:mysql://localhost:3306/job_tracker
+spring.datasource.username=your_username
+spring.datasource.password=your_password
+spring.jpa.hibernate.ddl-auto=update
 
 
+Run Spring Boot → Open browser.
 
+Key Technical Concepts Implemented
 
-👩‍💻 Author
+Authentication & Authorization
 
-Pala Bhavitha
+Role-Based Access Control
+
+RESTful API Design
+
+Entity Relationship Mapping (JPA)
+
+Workflow Logic
+
+Email Integration
+
+Future Enhancements
+
+JWT-based authentication
+
+Pagination and search
+
+Advanced filtering
+
+Microservices architecture
+
+Cloud deployment
+
+Author
+
+Pala Bhavitha | 
 Full Stack Developer
 
-Focused on designing secure and scalable full-stack web applications using Java and Spring Boot. Continuously advancing expertise in React, Next.js, and microservices architecture.
+Focused on designing and developing full-stack web applications using Java, Spring Boot, and Spring Security. Actively advancing skills in React, Next.js, and microservices architecture.
